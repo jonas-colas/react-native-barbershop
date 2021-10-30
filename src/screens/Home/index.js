@@ -1,31 +1,96 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { Container, Scroller, HeaderArea, HeaderTitle, SearchButton,
-  LocationArea, LocationInput, LocationFinder} from './styles';
+  LocationArea, LocationInput, LocationFinder, LoadingIcon,
+  ListArea } from './styles';
 import SearchIcon from '../../assets/search.svg';
 import MyLocationIcon from '../../assets/my_location.svg';
+import { useNavigation } from "@react-navigation/native";
+import { request, PERMISSIONS } from 'react-native-permissions';
+import Geolocation from '@react-native-community/geolocation';
+import { Platform } from 'react-native';
+import Api from '../../Api';
+import BarberItem from '../../components/BarberItem';
+
 
 
 export default () => {
+  const navigation = useNavigation();
 
+  const [locationText, setLocationText] = useState('');
+  const [coords, setCoords] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [list, setList] = useState([]);
+
+  const handleLocationFinder = async () => {
+    setCoords(null);
+    let result = await request(
+      Platform.OS === 'ios' ? 
+        PERMISSIONS.IOS.LOCATION_WHEN_IN_USE 
+        :
+        PERMISSIONS.ANDROID.ACCESS_FINE_LOCATION
+    );
+
+    if(result === 'granted'){
+      setLoading(true);
+      setLocationText();
+      setList([]);
+
+      Geolocation.getCurrentPosition(info => {
+        setCoords(info.coords);
+        getBarbers();
+      });
+    }
+  }
+
+  const getBarbers = async () => {
+    setLoading(true);
+    setList([]);
+    let barbers = await Api.getBarbers();
+    console.log(barbers);
+    if(barbers.error) {
+      alert(`Error: ${barbers.error}`);
+    }else{
+      if(barbers.loc) {
+        setLocationText(barbers.loc);
+      }
+      setList(barbers.data);
+    }
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    getBarbers();
+  }, []);
 
   return (
     <Container>
       <Scroller>
 
         <HeaderArea>
-          <HeaderTitle>Find your Barber Shop</HeaderTitle>
-          <SearchButton>
+          <HeaderTitle numberOfLines={2} >Find your favorite Barber Shop</HeaderTitle>
+          <SearchButton onPress={() => navigation.navigate('Search')}>
             <SearchIcon width="26" height="26" fill="#ffffff" />
           </SearchButton>
         </HeaderArea>
 
         <LocationArea>
-          <LocationInput />
-          <LocationFinder>
+          <LocationInput placeholder="Where are you ?"
+            placeholderTextColor="#ffffff" 
+            value={locationText} onChangeText={t => setLocationText(t)} />
+          
+          <LocationFinder onPress={handleLocationFinder}>
             <MyLocationIcon width="24" height="24" fill="#ffffff" />
           </LocationFinder>
         </LocationArea>
 
+        { loading && <LoadingIcon size="large" color="#ffffff" /> }
+
+        <ListArea>
+          { list?.map((item, i) => (
+              <BarberItem key={i} data={item} />
+            ) 
+          )}
+        </ListArea>
 
       </Scroller>
     </Container> 
