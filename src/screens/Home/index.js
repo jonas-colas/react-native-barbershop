@@ -46,8 +46,17 @@ export default () => {
   const getBarbers = async () => {
     setLoading(true);
     setList([]);
-    let barbers = await Api.getBarbers();
-    console.log(barbers);
+    
+    let lat = null;
+    let long = null;
+
+    if(coords){
+      lat = coords.latitude;
+      long = coords.longitude;
+    }
+
+    let barbers = await Api.getBarbers(lat, long, locationText);
+    // console.log(barbers);
     if(barbers.error) {
       alert(`Error: ${barbers.error}`);
     }else{
@@ -68,6 +77,11 @@ export default () => {
     getBarbers();
   }
 
+  const handleLocationSearch = () => {
+    setCoords({})
+    getBarbers();
+  }
+
   return (
     <Container>
       <Scroller refreshControl={
@@ -83,8 +97,9 @@ export default () => {
 
         <LocationArea>
           <LocationInput placeholder="Where are you ?"
-            placeholderTextColor="#ffffff" 
-            value={locationText} onChangeText={t => setLocationText(t)} />
+            placeholderTextColor="#ffffff" value={locationText} 
+            onChangeText={t => setLocationText(t)} 
+            onEndEditing={handleLocationSearch}/>
           
           <LocationFinder onPress={handleLocationFinder}>
             <MyLocationIcon width="24" height="24" fill="#ffffff" />
