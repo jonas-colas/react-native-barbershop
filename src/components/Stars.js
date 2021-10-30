@@ -22,6 +22,18 @@ const StarText = styled.Text`
 export default ({stars, showNumber}) => {
     let st = [0, 0, 0, 0, 0];
 
+    let floor = Math.floor(stars);
+    
+    for(var i=0; i<floor; i++) {
+      st[i] = 2; 
+    }
+
+    let left = stars - floor;
+    if(left > 0){
+      st[i] = 1;
+    }
+
+
 
   return (
     <StarArea>
