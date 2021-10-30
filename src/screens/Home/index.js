@@ -1,13 +1,13 @@
 import React, {useState, useEffect} from 'react';
+import { useNavigation } from "@react-navigation/native";
+import { request, PERMISSIONS } from 'react-native-permissions';
+import Geolocation from '@react-native-community/geolocation';
+import { Platform, RefreshControl } from 'react-native';
 import { Container, Scroller, HeaderArea, HeaderTitle, SearchButton,
   LocationArea, LocationInput, LocationFinder, LoadingIcon,
   ListArea } from './styles';
 import SearchIcon from '../../assets/search.svg';
 import MyLocationIcon from '../../assets/my_location.svg';
-import { useNavigation } from "@react-navigation/native";
-import { request, PERMISSIONS } from 'react-native-permissions';
-import Geolocation from '@react-native-community/geolocation';
-import { Platform } from 'react-native';
 import Api from '../../Api';
 import BarberItem from '../../components/BarberItem';
 
@@ -20,6 +20,7 @@ export default () => {
   const [coords, setCoords] = useState(null);
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleLocationFinder = async () => {
     setCoords(null);
@@ -62,9 +63,16 @@ export default () => {
     getBarbers();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(false);
+    getBarbers();
+  }
+
   return (
     <Container>
-      <Scroller>
+      <Scroller refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
 
         <HeaderArea>
           <HeaderTitle numberOfLines={2} >Find your favorite Barber Shop</HeaderTitle>
