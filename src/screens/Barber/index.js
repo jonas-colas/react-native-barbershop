@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Text } from 'react-native'
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Api from '../../Api';
 import Swiper from 'react-native-swiper';
@@ -14,6 +13,7 @@ import { Container, Scroller, SwipeItem, SwipeImage,
  TestimonialBody, BackButton } from './styles';
 import Stars from '../../components/Stars'
 import FavoriteIcon from '../../assets/favorite.svg';
+import FavoriteFullIcon from '../../assets/favorite_full.svg';
 import BackIcon from '../../assets/back.svg';
 import NavPrevIcon from '../../assets/nav_prev.svg';
 import NavNextIcon from '../../assets/nav_next.svg';
@@ -30,6 +30,7 @@ export default () => {
     stars: route.params.stars
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
 
   const getBarberInfo = async () => {
     setIsLoading(true);
@@ -38,12 +39,18 @@ export default () => {
       alert("Error: " + json.error);
     }else{
       setUserInfo(json.data);
+      setIsFavorited(json.data.favorited);
     }
     setIsLoading(false);
   }
 
   const handleBackButton = () => {
     navigation.goBack();
+  }
+
+  const handleFavClick = () => {
+    setIsFavorited(!isFavorited);
+    Api.setFavorite(userInfo.id);
   }
 
   useEffect(() => {
@@ -77,8 +84,12 @@ export default () => {
               <UserInfoName>{userInfo.name}</UserInfoName>
               <Stars stars={userInfo.stars} showNumber={true} />
             </UserInfo>
-            <UserFavButton>
-              <FavoriteIcon width="24" height="24" fill="#ff0000" />
+            <UserFavButton onPress={handleFavClick}>
+              {isFavorited ? 
+                  <FavoriteFullIcon width="24" height="24" fill="#ff0000" />
+                : 
+                  <FavoriteIcon width="24" height="24" fill="#ff0000" />
+              }
             </UserFavButton>
           </UserInfoArea>
           
