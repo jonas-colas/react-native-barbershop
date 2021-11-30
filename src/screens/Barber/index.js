@@ -17,6 +17,7 @@ import FavoriteFullIcon from '../../assets/favorite_full.svg';
 import BackIcon from '../../assets/back.svg';
 import NavPrevIcon from '../../assets/nav_prev.svg';
 import NavNextIcon from '../../assets/nav_next.svg';
+import BarberModal from '../../components/BarberModal';
 
 
 export default () => {
@@ -31,6 +32,8 @@ export default () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [selectedService, setSelectedService] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   const getBarberInfo = async () => {
     setIsLoading(true);
@@ -51,6 +54,11 @@ export default () => {
   const handleFavClick = () => {
     setIsFavorited(!isFavorited);
     Api.setFavorite(userInfo.id);
+  }
+
+  const handleServiceChoose = index => {
+    setSelectedService(index);
+    setShowModal(true);
   }
 
   useEffect(() => {
@@ -106,7 +114,9 @@ export default () => {
                       <ServicePrice>$ {serv.price}</ServicePrice>
                     </ServiceInfo>
                     <ServiceChooseButton>
-                      <ServiceChooseBtnText>Schedule</ServiceChooseBtnText>
+                      <ServiceChooseBtnText onPress={() => handleServiceChoose(i) }>
+                        Schedule
+                      </ServiceChooseBtnText>
                     </ServiceChooseButton>
                   </ServiceItem>
                 ))
@@ -141,6 +151,11 @@ export default () => {
       <BackButton onPress={handleBackButton}>
         <BackIcon width="44" height="44" fill="#ffffff" />
       </BackButton>
+
+      <BarberModal show={showModal} setShow={setShowModal} 
+        user= {userInfo} service={selectedService} 
+      />
+
     </Container> 
   );
 }
