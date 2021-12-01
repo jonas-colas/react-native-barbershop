@@ -80,9 +80,27 @@ export default {
         Accept: 'application/json',
         'Content-type': 'application/json'
       },
-      body: JSON.stringify({barber: barberId})
+      body: JSON.stringify({token, barber: barberId})
     });
     const json = await req.json();
     return json;
-  }
+  },
+
+  setAppointment: async (userId, 
+    service, selectedYear, selectedMonth, selectedHour) => {
+    const token = await AsyncStorage.getItem('token');
+    
+    const req = await fetch(`${BASE_API}/user/appointment`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-type': 'application/json'
+      },
+      body: JSON.stringify({token, id: userId, 
+        service, year: selectedYear, month: selectedMonth, 
+        day: selectedDay, hour: selectedHour})
+    });
+    const json = await req.json();
+    return json;
+  } 
 };
